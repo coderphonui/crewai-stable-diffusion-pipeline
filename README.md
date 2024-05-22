@@ -50,6 +50,10 @@ To run the AUTOMATIC1111 with API enable, run the below command:
 Step 4: run the pipeline
 
 ```
+# Install requirements first
+pip install -r requirements.txt
+
+# Run the pipeline
 python pipeline.py
 ```
 
