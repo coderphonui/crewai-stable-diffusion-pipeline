@@ -1,62 +1,64 @@
-# What is this project?
+## AI-Powered Image Generation Pipeline with CrewAI and Stable Diffusion
 
-This is my experiment to check the CrewAI and do some integration with Stable Diffusion / OpenAI gpt-4o / Google Gemini to create an image generator from a simple idea.
+This project explores the automation of high-quality image generation using a combination of AI technologies. It addresses the challenges of crafting detailed prompts for Stable Diffusion and refining generated images to achieve desired results.
 
-The problem I want to solve:
+### Problem Statement
 
-* When creating a photo with Stable Diffusion, I usually get stuck with the detail idea of the prompt to make the prompt more detail to make the photo better. 
-* Even with a good prompt, the generated photo is not good enough. A lot of problems of artifacts, atonomy, distorted ... It requires a loop to enhance the prompt, finetuing the parameters and run again.
+Generating high-quality images with Stable Diffusion often involves a tedious iterative process:
 
-I am not a designer guy. So, I expect the photo needs to be good enough and no need to enhance with other tools (dream) :). 
-Instead of running this process again and again, I decide to create a pipeline to automate this.
+* **Prompt Engineering:** Formulating a detailed prompt that accurately captures the desired image is crucial but challenging.
+* **Image Refinement:**  Generated images may contain artifacts, anatomical inconsistencies, or other imperfections requiring prompt adjustments, parameter tuning, and multiple generation attempts.
 
-# The idea of the pipeline
+This project aims to streamline this workflow, particularly for users who may not possess extensive design expertise and seek a more automated approach.
 
-![diagram](stable-difffusion-pipeline.png)
+### Solution Overview
 
-The pipeline is based on CrewAI (https://docs.crewai.com/). The concept is very simple. The pipeline has 2 agents: 
-* StableDiffusion expert to create prompt and use StableDiffusion UI tool to generate the photo. I am using automatic1111 (https://github.com/AUTOMATIC1111/stable-diffusion-webui) and its API to generate the photo. The integration with Stable Diffusion is in the sd_tool.py
-* Photo Auditor: check the photo to identify problems. If there's no problem, it will stop the process. The PhotoAuditor uses the ImageFeedbackTool which will submit the photo to OpenAI gpt-4o to ask for the verification (image_feedback_tool.py).
+This project leverages CrewAI, a platform for building AI agent workflows, to create an image generation pipeline.  The pipeline consists of two primary agents:
 
-# How to run the pipeline?
+1. **Stable Diffusion Expert:**
+    - Receives an initial image idea as input.
+    - Crafts a detailed prompt, including negative prompts, to guide Stable Diffusion.
+    - Utilizes the AUTOMATIC1111 web UI API to generate an image based on the crafted prompt.
+    - The `sd_tool.py` script handles the integration with Stable Diffusion.
 
-Step 1: setup your environment variables included Google API key and OpenAI API key
+2. **Photo Auditor:**
+    - Evaluates the generated image for quality and adherence to the initial idea.
+    - Employs the `ImageFeedbackTool` (implemented in `image_feedback_tool.py`) to submit the image to OpenAI's GPT-4 for analysis and feedback.
+    - If the image meets the quality criteria, the process concludes. Otherwise, the feedback is relayed back to the Stable Diffusion Expert for prompt refinement and image regeneration.
 
-```
-export GOOGLE_API_KEY=<your-google-api-key>
-export OPENAI_API_KEY=<your-google-api-key>
-```
+![Pipeline Diagram](stable-difffusion-pipeline.png)
 
-Step 2: check the code of the pipeline.py. You can modify the idea of the photo in the create_photo_task
+### Getting Started
 
-```
-create_photo_task = Task(
-  description="""Generate photo for the idea: 'A beautiful girl in a jungle'""",
-  expected_output='Prompt and negative prompt in the markdown format in code block and the path of the generated image',
-  agent=stable_diffusion_expert
-)
-```
+1. **Environment Setup:**
+    - Install the required dependencies: `pip install -r requirements.txt`
+    - Set up your Google Cloud API key and OpenAI API key as environment variables:
+        ```bash
+        export GOOGLE_API_KEY=<your-google-api-key>
+        export OPENAI_API_KEY=<your-openai-api-key>
+        ```
 
-Step 3: run the AUTOMATIC1111 tool
+2. **Configure Image Idea:**
+    - Modify the `create_photo_task` within `pipeline.py` to specify your desired image idea:
+        ```python
+        create_photo_task = Task(
+            description="""Generate photo for the idea: 'Your image idea here'""",
+            expected_output='Prompt and negative prompt in markdown format within a code block, and the path of the generated image',
+            agent=stable_diffusion_expert
+        )
+        ```
 
-Checkout the AUTOMATIC1111 and set it up. You should check their guideline. It's out of scope of this repository. Ensure you download some great checkpoints(ChilloutMix, DreamSharper ...). Checkpoints are very important to have nice photos :)
+3. **Run AUTOMATIC1111:**
+    - Ensure you have the AUTOMATIC1111 Stable Diffusion web UI set up and running with the API enabled. 
+    - Download and configure desired checkpoints (e.g., ChilloutMix, DreamShaper) for optimal image quality.
+    - Start the web UI with API access:
+        ```bash
+        ./webui.sh --listen --api 
+        ```
 
-To run the AUTOMATIC1111 with API enable, run the below command:
+4. **Execute the Pipeline:**
+    - Run the pipeline script: `python pipeline.py`
 
-```
-./webui.sh --listen --api
-```
-
-Step 4: run the pipeline
-
-```
-# Install requirements first
-pip install -r requirements.txt
-
-# Run the pipeline
-python pipeline.py
-```
-
-The generated photo is in the output/txt2img directory. I commit some photos in the output/txt2img directory for reference of the output that I made.
+Generated images will be saved to the `output/txt2img` directory. Sample output images are included in the repository for reference. 
 
 Enjoy!
