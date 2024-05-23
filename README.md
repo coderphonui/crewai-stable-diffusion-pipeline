@@ -39,13 +39,9 @@ This project leverages CrewAI, a platform for building AI agent workflows, to cr
         ```
 
 2. **Configure Image Idea:**
-    - Modify the `create_photo_task` within `pipeline.py` to specify your desired image idea:
+    - Modify the crew.kickoff line within `pipeline.py` to specify your desired image idea:
         ```python
-        create_photo_task = Task(
-            description="""Generate photo for the idea: 'Your image idea here'""",
-            expected_output='Prompt and negative prompt in markdown format within a code block, and the path of the generated image',
-            agent=stable_diffusion_expert
-        )
+        result = crew.kickoff(inputs={'topic': 'Your Image Idea'})
         ```
 
 3. **Run AUTOMATIC1111:**
